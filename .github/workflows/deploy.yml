@@ -72,7 +72,7 @@ jobs:
      # - name: Downloading artifacts
       #  uses: actions/download-artifact@v4
        # with:
-        #  repository: nareshyedlapalli/az-vm-deployment/
+        #  repository: nareshyedlapalli/az-vmdeployment/
          # github-token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
          # run-id: ${{ inputs.build_id }}
       ####################################################################
