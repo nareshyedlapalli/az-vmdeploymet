@@ -1,8 +1,8 @@
 name: AzureVM-dev-Deploy
 # Trigger the workflow when pushing to the main branch or manually via workflow dispatch
 on:
-  push:
-    branches:
+  #push:
+   # branches:
       # - main
 
   workflow_dispatch:
