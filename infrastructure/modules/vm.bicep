@@ -87,7 +87,7 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2024-03-01' = {
     }
     storageProfile: {
       osDisk: {
-        name: 'app-osdsk-${workload}-${environment}-${location}'
+        name: '${computerName}-osdsk-${workload}-${environment}-${location}'
         createOption: 'fromImage'
         managedDisk: {
           storageAccountType: 'Premium_LRS'
