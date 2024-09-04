@@ -78,7 +78,7 @@ permissions:
 ####################################################################
 jobs:
   deploy:
-    uses: nareshyedlapalli/az-vm-deployment/.github/workflows/deploy.yml@main
+    uses: nareshyedlapalli/az-vmdeployment/.github/workflows/deploy.yml@main
     with:
      # build_id: ${{ inputs.build_id }}
       workload: ${{ inputs.workload }}
