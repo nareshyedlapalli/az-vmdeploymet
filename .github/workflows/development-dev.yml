@@ -78,35 +78,19 @@ permissions:
 ####################################################################
 ## Jobs
 ####################################################################
-jobs:  
-  deploy:  
-    runs-on: ubuntu-latest  
-    steps:  
-      - name: Set Image ID  
-        id: set-image-id  
-        run: |  
-          if [[ "${{ inputs.vmImageDetails }}" == "windows" ]]; then  
-            echo "::set-output name=image-id::/subscriptions/e7aab2b6-9293-4e87-a1b2-0d4bab217a10/resourceGroups/rg-app1-dev-eastus-01/providers/Microsoft.Compute/galleries/windows2022/images/windows/versions/0.0.1"  
-          elif [[ "${{ inputs.vmImageDetails }}" == "linux" ]]; then  
-            echo "::set-output name=image-id::/subscriptions/e7aab2b6-9293-4e87-a1b2-0d4bab217a10/resourceGroups/rg-app1-dev-eastus-01/providers/Microsoft.Compute/galleries/test/images/test/versions/0.0.2"  
-          elif [[ "${{ inputs.vmImageDetails }}" == "windows-domain-joined" ]]; then  
-            echo "::set-output name=image-id::/subscriptions/your-subscription-id/resourceGroups/your-resource-group/providers/Microsoft.Compute/galleries/your-gallery-name/images/windows-domain-joined/versions/your-version"  
-          elif [[ "${{ inputs.vmImageDetails }}" == "linux-domain-joined" ]]; then  
-            echo "::set-output name=image-id::/subscriptions/your-subscription-id/resourceGroups/your-resource-group/providers/Microsoft.Compute/galleries/your-gallery-name/images/linux-domain-joined/versions/your-version"  
-          fi  
-  
-      - name: Deploy Azure VM  
-        uses: ./.github/workflows/deploy.yml
-        with:
-         # build_id: ${{ inputs.build_id }}
-          workload: ${{ inputs.workload }}
-          resourceGroupName: ${{ inputs.resourceGroupName }}
-          environment: dev
-          # subscription-id: ${{ inputs.subscription-id }}
-          location: ${{ inputs.location }}
-          instance_count: '01'
-          subnetName: ${{ inputs.subnetName }}
-          vmSize: ${{inputs.vmSize}}
-          computerName: ${{ inputs.computerName }}
-          vmImageDetails: ${{ inputs.vmImageDetails }}
-          secrets: inherit 
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy.yml
+    with:
+     # build_id: ${{ inputs.build_id }}
+      workload: ${{ inputs.workload }}
+      resourceGroupName: ${{ inputs.resourceGroupName }}
+      environment: dev
+      # subscription-id: ${{ inputs.subscription-id }}
+      location: ${{ inputs.location }}
+      instance_count: '01'
+      subnetName: ${{ inputs.subnetName }}
+      vmSize: ${{inputs.vmSize}}
+      computerName: ${{ inputs.computerName }}
+      vmImageDetails: ${{ inputs.vmImageDetails }}
+    secrets: inherit
