@@ -96,16 +96,17 @@ jobs:
           fi  
   
       - name: Deploy Azure VM  
-        uses: ./.github/workflows/deploy.yml  
-        with:  
-          vmImageDetails: ${{ inputs.vmImageDetails }}  
-          vmImageId: ${{ steps.set-image-id.outputs.image-id }}  
-          workload: ${{ inputs.workload }}  
-          resourceGroupName: ${{ inputs.resourceGroupName }}  
-          environment: dev  
-          location: ${{ inputs.location }}  
-          instance_count: '01'  
-          subnetName: ${{ inputs.subnetName }}  
-          vmSize: ${{ inputs.vmSize }}  
+        uses: ./.github/workflows/deploy.yml
+        with:
+         # build_id: ${{ inputs.build_id }}
+          workload: ${{ inputs.workload }}
+          resourceGroupName: ${{ inputs.resourceGroupName }}
+          environment: dev
+          # subscription-id: ${{ inputs.subscription-id }}
+          location: ${{ inputs.location }}
+          instance_count: '01'
+          subnetName: ${{ inputs.subnetName }}
+          vmSize: ${{inputs.vmSize}}
           computerName: ${{ inputs.computerName }}
-          secrets: inherit
+          vmImageDetails: ${{ inputs.vmImageDetails }}
+          secrets: inherit 
