@@ -118,7 +118,7 @@ jobs:
           subnetName=${{ inputs.subnetName }} \
           vmSize=${{inputs.vmSize}} \
           vmname=vm-${{ inputs.workload }}-${{ inputs.environment }}-${{ inputs.location }}-${{ inputs.instance_count }} \
-          vmImageDetails=${{ inputs.vmImageDetails  }} \
+          vmImageDetails=${{ steps.set-vm-image-details.outputs.image-details }} \
           computerName=${{ inputs.computerName }} \
           vmAdminPassword=${{ secrets.vmAdminPassword }} 
           # extensionDomainJoinPassword=${{ secrets.extensionDomainJoinPassword }} \
@@ -142,7 +142,7 @@ jobs:
           subnetName=${{ inputs.subnetName }} \
           vmSize=${{inputs.vmSize}} \
           vmname=vm-${{ inputs.workload }}-${{ inputs.environment }}-${{ inputs.location }}-${{ inputs.instance_count }} \
-          vmImageDetails=${{ inputs.vmImageDetails  }} \
+          vmImageDetails=${{ steps.set-vm-image-details.outputs.image-details }} \
           computerName=${{ inputs.computerName }} \
           vmAdminPassword=${{ secrets.vmAdminPassword }} 
           # extensionDomainJoinPassword=${{ secrets.extensionDomainJoinPassword }} \
