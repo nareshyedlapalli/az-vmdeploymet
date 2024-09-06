@@ -1,9 +1,9 @@
 name: AzureVM-dev-Deploy
 # Trigger the workflow when pushing to the main branch or manually via workflow dispatch
 on:
-  #push:
-   # branches:
-      # - main
+  # push:
+  #   branches:
+  #     # - main
 
   workflow_dispatch:
     inputs:
@@ -28,15 +28,15 @@ on:
         required: true
         description: Computer Name
         type: string
-      vmImageDetails:
+      imageType:
         description: 'Image Type'
         required: true
-        default: 'warning'
+        default: windows
         type: choice
         options:
           - windows
           - linux
-          - windows-domain-joined
+          - windows_domain_joined
           - linux-domain-joined
       workload:
         required: true
@@ -80,10 +80,11 @@ permissions:
 ####################################################################
 jobs:
   deploy:
-    uses: ./.github/workflows/deploy.yml
+    uses: nareshyedlapalli/az-vm-deployment/.github/workflows/deploy.yml@main    
     with:
      # build_id: ${{ inputs.build_id }}
       workload: ${{ inputs.workload }}
+      imageType: ${{ inputs.imageType  }}
       resourceGroupName: ${{ inputs.resourceGroupName }}
       environment: dev
       # subscription-id: ${{ inputs.subscription-id }}
@@ -92,5 +93,4 @@ jobs:
       subnetName: ${{ inputs.subnetName }}
       vmSize: ${{inputs.vmSize}}
       computerName: ${{ inputs.computerName }}
-      vmImageDetails: ${{ inputs.vmImageDetails }}
-    secrets: inherit
+    secrets: inherit    
