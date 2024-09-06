@@ -14,31 +14,56 @@ param networkResourceGroupName string
 param vmname string
 @description('Computer name')
 param computerName string
+@description('VM domain admin user name')
+param domainAdminUserName string
+@description('VM Domain Join Option ')
+param vmDomainJoinDomainName string
+@secure()
+@description('VM domain admin user password')
+param domainAdminPassword string
+@description('VM Domain Join Option ')
+param domainJoinOptions int
+@description('ou Path')
+param ouPath string
 @secure()
 @description('VM admin user name')
 param vmAdminUserName string
 @secure()
 @description('VM admin password')
 param vmAdminPassword string
-@description('VM image details')
-param vmImageDetails string
+
 @description('Location')
 param location string = resourceGroup().location
 
+@allowed(
+  [
+    'windows'
+    'linux'
+    'windows_domain_joined'
+  ]
+)
+param imageType string
 
-// param Vmimage object = {
-//   ADImage: '1'
-//   NonADImage : '2'
-// }
+var imageDetails = {
+  windows: {
+    id: NonADImage.id
+  }
+  windows_domain_joined: {
+    id: ADImage.id
+  }
+}
+
+var vmDetails = imageDetails[imageType]
+var ADJoin = imageType == 'windows_domain_joined'
 
 
-// resource ADImage 'Microsoft.Compute/galleries/images/versions@2023-07-03' existing = {
-//   name: 'windows2022/windows/0.0.1'
-// }
+resource ADImage 'Microsoft.Compute/galleries/images/versions@2023-07-03' existing = {
+  name: 'windows2022/windows/0.0.1'
+}
 
-// resource NonADImage 'Microsoft.Compute/galleries/images/versions@2023-07-03' existing = {
-//   name: 'test/test/0.0.2'
-// }
+resource NonADImage 'Microsoft.Compute/galleries/images/versions@2023-07-03' existing = {
+  name: 'test/test/0.0.2'
+}
 
 
 @description('VNet Name to deploy VM')
@@ -87,7 +112,7 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2024-03-01' = {
     }
     storageProfile: {
       osDisk: {
-        name: '${computerName}-osdsk-${workload}-${environment}-${location}'
+        name: 'app-osdsk-${workload}-${environment}-${location}'
         createOption: 'fromImage'
         managedDisk: {
           storageAccountType: 'Premium_LRS'
@@ -95,7 +120,7 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2024-03-01' = {
         deleteOption: 'Delete'
       }
       imageReference: {
-        id: vmImageDetails
+        id: vmDetails.id
       }
      }
     networkProfile: {
@@ -107,24 +132,25 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2024-03-01' = {
     }
   }
 }
-//@description(' Adding Windows System into Domain')
-// resource virtualMachineExtension 'Microsoft.Compute/virtualMachines/extensions@2024-03-01' = {
-//   name: '${virtualMachine.name}/joindomain'
-//   location: location
-//   properties: {
-//     publisher: 'Microsoft.Compute'
-//     type: 'JsonADDomainExtension'
-//     typeHandlerVersion: '1.3'
-//     autoUpgradeMinorVersion: true
-//     settings: {
-//       name: extensionDomainJoinDomainName
-//       ouPath: ouPath
-//       user: '${extensionDomainJoinDomainName}\\${extensionDomainJoinUserName}'
-//       restart: true
-//       options: domainJoinOptions
-//     }
-//     protectedSettings: {
-//       password: extensionDomainJoinPassword
-//     }
-//   }
-// }
+
+@description(' Adding Windows System into Domain')
+resource virtualMachineExtension 'Microsoft.Compute/virtualMachines/extensions@2024-03-01' = if (ADJoin) {
+  name: '${virtualMachine.name}/joindomain'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'JsonADDomainExtension'
+    typeHandlerVersion: '1.3'
+    autoUpgradeMinorVersion: true
+    settings: {
+      name: vmDomainJoinDomainName
+      ouPath: ouPath
+      user: '${vmDomainJoinDomainName}\\${domainAdminUserName}'
+      restart: true
+      options: domainJoinOptions
+    }
+    protectedSettings: {
+      password: domainAdminPassword
+    }
+  }
+}
