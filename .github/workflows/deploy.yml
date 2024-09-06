@@ -1,71 +1,54 @@
-name: AzureVM-dev-Deploy
-# Trigger the workflow when pushing to the main branch or manually via workflow dispatch
+name: azureVM-deploy
+####################################################################
+## Triggers
+####################################################################
 on:
-  # push:
-  #   branches:
-  #     # - main
-
-  workflow_dispatch:
+  workflow_call:
     inputs:
       # subscription-id:
       #   required: true
       #   description: subscription-id for the deployement
       #   type: string
       # build_id:
-      #  description: build workflow id to pick artifacts and deploy
       #  required: true
+      #  description: Build ID
+      #  type: string
       resourceGroupName:
         required: true
         description: Reaource Group Name
         type: string
-        default: ''
       subnetName:
         required: true
-        description: Subnet Name
+        description: Subnet Name 
         type: string
-        default: ''
       computerName:
         required: true
         description: Computer Name
         type: string
       imageType:
-        description: 'Image Type'
         required: true
-        default: windows
-        type: choice
-        options:
-          - windows
-          - linux
-          - windows_domain_joined
-          - linux-domain-joined
+        description: Virtual Machine Image Type
+        type: string
       workload:
         required: true
-        description: APP Name
+        description: App Name
         type: string
-        default: ''
       environment:
         required: true
-        description: Environment
+        description: Environment to run this workflow
         type: string
-        default: ''
       vmSize:
         required: true
         description: Select a VM size to support the workload that you want to run
         type: string
-        default: ''
       location:
         required: true
         description: Azure location to carry out deployment
-        type: choice
-        default: ''
-        options:
-          - centralus
-          - eastus
-      # instance_count:
-      #   required: false
-      #   description: Two digit instance count for azure resources
-      #   type: string
-      #   default: '01'
+        type: string
+      instance_count:
+        required: true
+        description: Two digit instance count for azure resources
+        type: string
 
 ####################################################################
 ## Permissions
@@ -76,21 +59,81 @@ permissions:
   actions: read
 
 ####################################################################
-## Jobs
+## Job
 ####################################################################
 jobs:
   deploy:
-    uses: nareshyedlapalli/az-vm-deployment/.github/workflows/deploy.yml@main    
-    with:
-     # build_id: ${{ inputs.build_id }}
-      workload: ${{ inputs.workload }}
-      imageType: ${{ inputs.imageType  }}
-      resourceGroupName: ${{ inputs.resourceGroupName }}
-      environment: dev
-      # subscription-id: ${{ inputs.subscription-id }}
-      location: ${{ inputs.location }}
-      instance_count: '01'
-      subnetName: ${{ inputs.subnetName }}
-      vmSize: ${{inputs.vmSize}}
-      computerName: ${{ inputs.computerName }}
-    secrets: inherit    
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      ####################################################################
+      ## Download artifacts from pipeline
+      ####################################################################
+     # - name: Downloading artifacts
+      #  uses: actions/download-artifact@v4
+       # with:
+        #  repository: nareshyedlapalli/az-vm-deployment/
+         # github-token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
+         # run-id: ${{ inputs.build_id }}
+      ####################################################################
+      ## Login to azure
+      ####################################################################
+      - uses: actions/checkout@v4
+      - name: Login to azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          allow-no-subscriptions: true
+      # ####################################################################
+      # ## Set Subscription
+      # ####################################################################
+      # - name: set azure infrastructure
+      #   run: |
+      #     az account set -s  ${{ inputs.subscription-id }}
+      # ####################################################################
+      # ## Running infrastructure validation
+      # ####################################################################
+      # - name: Validate azure infrastructure
+      #   run: |
+      #     az deployment group validate \
+      #     --resource-group ${{ inputs.resourceGroupName }} \
+      #     --template-file infrastructure/main.bicep \
+      #     --parameters infrastructure/params/${{ inputs.environment }}.bicepparam \
+      #     --parameters environment=${{ inputs.environment }} \
+      #     workload=${{ inputs.workload }} \
+      #     location=${{ inputs.location }} \
+      #     resourceGroupName=${{ inputs.resourceGroupName }} \
+      #     subnetName=${{ inputs.subnetName }} \
+      #     vmSize=${{inputs.vmSize}} \
+      #     vmname=vm-${{ inputs.workload }}-${{ inputs.environment }}-${{ inputs.location }}-${{ inputs.instance_count }} \
+      #     imageType=${{ inputs.imageType  }} \
+      #     computerName=${{ inputs.computerName }} \
+      #     vmAdminPassword=${{ secrets.vmAdminPassword }} 
+      #     # extensionDomainJoinPassword=${{ secrets.extensionDomainJoinPassword }} \
+      #     # extensionDomainJoinUserName=${{ vars.extensionDomainJoinUserName }} \
+      #     # extensionDomainJoinDomainName=${{ vars.extensionDomainJoinDomainName }} \
+       
+
+      ####################################################################
+      ## Deploying infrasturcture
+      ####################################################################
+      - name: Deploying azure infrastructure
+        run: |
+          az deployment group create \
+          --resource-group ${{ inputs.resourceGroupName }} \
+          --template-file infrastructure/main.bicep \
+          --parameters infrastructure/params/${{ inputs.environment }}.bicepparam \
+          --parameters environment=${{ inputs.environment }} \
+          resourceGroupName=${{ inputs.resourceGroupName }} \
+          workload=${{ inputs.workload }} \
+          location=${{ inputs.location }} \
+          subnetName=${{ inputs.subnetName }} \
+          vmSize=${{inputs.vmSize}} \
+          vmname=vm-${{ inputs.workload }}-${{ inputs.environment }}-${{ inputs.location }}-${{ inputs.instance_count }} \
+          imageType=${{ inputs.imageType  }} \
+          computerName=${{ inputs.computerName }} \
+          vmAdminPassword=${{ secrets.vmAdminPassword }} 
+          # extensionDomainJoinPassword=${{ secrets.extensionDomainJoinPassword }} \
+          # extensionDomainJoinUserName=${{ vars.extensionDomainJoinUserName }} \
+          # extensionDomainJoinDomainName=${{ vars.extensionDomainJoinDomainName }}           
+       
