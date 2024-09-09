@@ -30,7 +30,6 @@ on:
           - windows
           - linux
           - windows_domain_joined
-          - linux-domain-joined
       workload:
         required: true
         description: APP Name
