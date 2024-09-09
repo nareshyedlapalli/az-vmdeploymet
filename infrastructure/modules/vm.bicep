@@ -84,7 +84,7 @@ resource subnet 'Microsoft.Network/virtualNetworks/subnets@2022-09-01' existing 
 
 @description('Network Interface Card Name')
 resource nic 'Microsoft.Network/networkInterfaces@2024-01-01' = {
-  name: '${computerName, location}-VM-Nic'
+  name: '${computerName}-VM-Nic'
   location: location
   properties: {
     ipConfigurations: [
