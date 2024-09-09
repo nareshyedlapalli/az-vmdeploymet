@@ -7,13 +7,6 @@ on:
 
   workflow_dispatch:
     inputs:
-      # subscription-id:
-      #   required: true
-      #   description: subscription-id for the deployement
-      #   type: string
-      # build_id:
-      #  description: build workflow id to pick artifacts and deploy
-      #  required: true
       resourceGroupName:
         required: true
         description: Reaource Group Name
@@ -80,7 +73,7 @@ permissions:
 ####################################################################
 jobs:
   deploy:
-    uses: ./.github/workflows/deploy.yml@main    
+    uses: nareshyedlapalli/az-vmdeploymet/.github/workflows/deploy.yml@main    
     with:
      # build_id: ${{ inputs.build_id }}
       workload: ${{ inputs.workload }}
