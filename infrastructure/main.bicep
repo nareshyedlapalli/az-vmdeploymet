@@ -5,10 +5,6 @@ param environment string
 @description('Workload name')
 param workload string
 
-@description('Region for all resources in this module')
-param location string = resourceGroup().location
-
-
 @description('Vnet name')
 param vnetName string
 
@@ -49,14 +45,20 @@ param domainJoinOptions int
 @description('ou Path')
 param ouPath string
 
+targetScope = 'subscription'
+
+resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' existing = {
+  name: resourceGroupName
+}
+
 
 @description('VM Creation Module')
 module vmCreation 'modules/vm.bicep' = {
   name: 'vmDeployment'
-  scope: resourceGroup(resourceGroupName)
+  scope: resourceGroup
   params: {
     imageType: imageType
-    location: location
+    location: resourceGroup.location
     networkResourceGroupName: networkResourceGroupName
     vnetName: vnetName
     subnetName: subnetName
