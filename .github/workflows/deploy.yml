@@ -1,3 +1,4 @@
+
 name: azureVM-deploy
 ####################################################################
 ## Triggers
@@ -5,14 +6,6 @@ name: azureVM-deploy
 on:
   workflow_call:
     inputs:
-      # subscription-id:
-      #   required: true
-      #   description: subscription-id for the deployement
-      #   type: string
-      # build_id:
-      #  required: true
-      #  description: Build ID
-      #  type: string
       resourceGroupName:
         required: true
         description: Reaource Group Name
@@ -67,15 +60,6 @@ jobs:
     environment: ${{ inputs.environment }}
     steps:
       ####################################################################
-      ## Download artifacts from pipeline
-      ####################################################################
-     # - name: Downloading artifacts
-      #  uses: actions/download-artifact@v4
-       # with:
-        #  repository: nareshyedlapalli/az-vmdeployment/
-         # github-token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
-         # run-id: ${{ inputs.build_id }}
-      ####################################################################
       ## Login to azure
       ####################################################################
       - uses: actions/checkout@v4
@@ -93,25 +77,24 @@ jobs:
       # ####################################################################
       # ## Running infrastructure validation
       # ####################################################################
-      # - name: Validate azure infrastructure
-      #   run: |
-      #     az deployment group validate \
-      #     --resource-group ${{ inputs.resourceGroupName }} \
-      #     --template-file infrastructure/main.bicep \
-      #     --parameters infrastructure/params/${{ inputs.environment }}.bicepparam \
-      #     --parameters environment=${{ inputs.environment }} \
-      #     workload=${{ inputs.workload }} \
-      #     location=${{ inputs.location }} \
-      #     resourceGroupName=${{ inputs.resourceGroupName }} \
-      #     subnetName=${{ inputs.subnetName }} \
-      #     vmSize=${{inputs.vmSize}} \
-      #     vmname=vm-${{ inputs.workload }}-${{ inputs.environment }}-${{ inputs.location }}-${{ inputs.instance_count }} \
-      #     imageType=${{ inputs.imageType  }} \
-      #     computerName=${{ inputs.computerName }} \
-      #     vmAdminPassword=${{ secrets.vmAdminPassword }} 
-      #     # extensionDomainJoinPassword=${{ secrets.extensionDomainJoinPassword }} \
-      #     # extensionDomainJoinUserName=${{ vars.extensionDomainJoinUserName }} \
-      #     # extensionDomainJoinDomainName=${{ vars.extensionDomainJoinDomainName }} \
+      - name: Validate azure infrastructure
+        run: |
+          az deployment sub validate \
+          --location=${{ inputs.location }} \
+          --template-file infrastructure/main.bicep \
+          --parameters infrastructure/params/${{ inputs.environment }}.bicepparam \
+          --parameters environment=${{ inputs.environment }} \
+          resourceGroupName=${{ inputs.resourceGroupName }} \
+          workload=${{ inputs.workload }} \
+          subnetName=${{ inputs.subnetName }} \
+          vmSize=${{inputs.vmSize}} \
+          vmname=vm-${{ inputs.workload }}-${{ inputs.environment }}-${{ inputs.location }}-${{ inputs.instance_count }} \
+          imageType=${{ inputs.imageType  }} \
+          computerName=${{ inputs.computerName }} \
+          vmAdminPassword=${{ secrets.vmAdminPassword }} 
+          # extensionDomainJoinPassword=${{ secrets.extensionDomainJoinPassword }} \
+          # extensionDomainJoinUserName=${{ vars.extensionDomainJoinUserName }} \
+          # extensionDomainJoinDomainName=${{ vars.extensionDomainJoinDomainName }} 
        
 
       ####################################################################
@@ -119,14 +102,13 @@ jobs:
       ####################################################################
       - name: Deploying azure infrastructure
         run: |
-          az deployment group create \
-          --resource-group ${{ inputs.resourceGroupName }} \
+          az deployment sub create \
+          --location=${{ inputs.location }} \
           --template-file infrastructure/main.bicep \
           --parameters infrastructure/params/${{ inputs.environment }}.bicepparam \
           --parameters environment=${{ inputs.environment }} \
           resourceGroupName=${{ inputs.resourceGroupName }} \
           workload=${{ inputs.workload }} \
-          location=${{ inputs.location }} \
           subnetName=${{ inputs.subnetName }} \
           vmSize=${{inputs.vmSize}} \
           vmname=vm-${{ inputs.workload }}-${{ inputs.environment }}-${{ inputs.location }}-${{ inputs.instance_count }} \
