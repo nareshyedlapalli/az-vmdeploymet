@@ -33,7 +33,10 @@ param vmAdminUserName string
 param vmAdminPassword string
 
 @description('Location')
-param location string = resourceGroup().location
+param location string
+
+param imagesubscription string = 'aec58933-bd6a-4ce6-b190-82868d3be55b'
+param imagerg string = 'rg-os-images-eastus-01'
 
 @allowed(
   [
@@ -58,13 +61,14 @@ var ADJoin = imageType == 'windows_domain_joined'
 
 
 resource ADImage 'Microsoft.Compute/galleries/images/versions@2023-07-03' existing = {
-  name: 'windows2022/windows/0.0.1'
+  name: 'windows_domain_join/Windows_domain_Join/0.0.1'
+  scope: resourceGroup(imagesubscription,imagerg)
 }
 
 resource NonADImage 'Microsoft.Compute/galleries/images/versions@2023-07-03' existing = {
-  name: 'test/test/0.0.2'
+  name: 'windows_non_domain/Windows_azure_Non_Domain/0.0.1'
+  scope: resourceGroup(imagesubscription,imagerg)
 }
-
 
 @description('VNet Name to deploy VM')
 resource vnet 'Microsoft.Network/virtualNetworks@2022-09-01' existing = {
@@ -78,10 +82,9 @@ resource subnet 'Microsoft.Network/virtualNetworks/subnets@2022-09-01' existing 
 }
 
 
-
 @description('Network Interface Card Name')
 resource nic 'Microsoft.Network/networkInterfaces@2024-01-01' = {
-  name: '${computername, location)}-VM-Nic'
+  name: '${uniqueString(deployment().name, location)}-VM-Nic'
   location: location
   properties: {
     ipConfigurations: [
@@ -129,6 +132,13 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2024-03-01' = {
           id: nic.id
         }
       ]
+    }
+    securityProfile: {
+      uefiSettings: {
+        secureBootEnabled: true
+        vTpmEnabled: true
+      }
+      securityType: 'TrustedLaunch'
     }
   }
 }
