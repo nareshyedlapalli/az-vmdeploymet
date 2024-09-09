@@ -14,5 +14,5 @@ param vmAdminPassword = ''
 param vmDomainJoinDomainName = 'abc.com'
 param domainAdminUserName = 'admin1'
 param domainAdminPassword = ''
-param domainJoinOptions = 3
+param domainJoinOptions = '3'
 param ouPath = ''
